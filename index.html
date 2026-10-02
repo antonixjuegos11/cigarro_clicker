@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cigarro Clicker</title>
+<style>
+:root{--bg:#1d1b22;--panel:#2a2731;--ink:#f3ece0;--mute:#a59fae;--line:#443f50;--ember:#ff6a1a;--gold:#f2b84b;--ok:#5fd18b;--tile:#34303d;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#efe7d8;--panel:#fbf6ea;--ink:#2b2622;--mute:#7b7366;--line:#d6ccb6;--tile:#f1e8d4}}
+:root[data-theme="dark"]{--bg:#1d1b22}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,"Times New Roman",serif}
+.wrap{max-width:960px;margin:0 auto;padding:14px;display:grid;gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+h2{margin:0 0 10px;font-size:1.1rem}
+.stage{text-align:center;position:relative;overflow:hidden;user-select:none;-webkit-user-select:none;background:radial-gradient(ellipse at 80% 60%,rgba(255,106,26,.22),transparent 60%),var(--panel)}
+h1{font-size:1.5rem;margin:0}
+.total{font-size:2.6rem;font-weight:700;margin:6px 0 0;font-variant-numeric:tabular-nums}
+.sub{color:var(--mute);margin:2px 0 0}
+#snd{position:absolute;top:12px;right:12px}
+#fxbar{min-height:26px;margin-top:6px;color:var(--gold);font-weight:700}
+#cig{cursor:pointer;padding:18px 0 14px;width:100%;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+#cig svg{width:min(94%,460px);height:auto;transform:rotate(-6deg);transition:transform .08s;filter:drop-shadow(0 10px 14px rgba(0,0,0,.45))}
+#cig:active svg{transform:rotate(-9deg) scale(.96)}
+.glow{animation:glow 1.4s ease-in-out infinite alternate}
+@keyframes glow{from{opacity:.7}to{opacity:1}}
+.puff{position:absolute;pointer-events:none;border-radius:50%;background:radial-gradient(circle,#cfcfd6,#8f8f99);filter:blur(4px);opacity:.55;animation:rise 1.8s ease-out forwards}
+@keyframes rise{to{transform:translate(var(--dx),-150px) scale(3.2);opacity:0}}
+.plus{position:absolute;pointer-events:none;font-weight:700;color:var(--gold);text-shadow:0 1px 3px #000;animation:up .9s ease-out forwards}
+@keyframes up{to{transform:translateY(-60px);opacity:0}}
+.gold{position:absolute;width:68px;height:68px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff6c2,#f2b84b 55%,#a8730f);box-shadow:0 0 22px #ffd24a;display:grid;place-items:center;font-size:2rem;cursor:pointer;z-index:5;touch-action:manipulation;animation:pulse .7s ease-in-out infinite alternate}
+@keyframes pulse{to{transform:scale(1.15)}}
+@media(prefers-reduced-motion:reduce){.glow,.puff,.plus,.gold{animation:none}.puff{display:none}}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.tile{background:var(--tile);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px;font:inherit;text-align:center;cursor:pointer;position:relative}
+.tile:disabled{opacity:.45;cursor:not-allowed}
+.tile:not(:disabled):hover{border-color:var(--ember)}
+button:focus-visible{outline:3px solid var(--ember)}
+.ico{font-size:2.4rem;line-height:1.1}
+.tile b{display:block;font-size:.95rem}
+.tile small{display:block;color:var(--mute);font-size:.8rem}
+.cost{color:var(--gold);font-weight:700;margin-top:4px;font-variant-numeric:tabular-nums}
+.own{position:absolute;top:6px;right:8px;font-size:1.1rem;color:var(--mute);font-weight:700}
+.hand{border-color:var(--gold)}
+.row{display:flex;gap:10px;align-items:center;padding:6px 0;border-bottom:1px dashed var(--line)}
+.row:last-child{border:0}
+.row .lab{min-width:130px;font-size:.9rem}
+.row .it{font-size:1.4rem;line-height:1.3;word-break:break-all}
+.ach{opacity:.35;filter:grayscale(1);cursor:default}
+.ach.on{opacity:1;filter:none;border-color:var(--ok)}
+.empty{color:var(--mute);font-size:.9rem}
+.slot.empty{border-style:dashed;opacity:.6;cursor:default;display:grid;place-items:center}
+.r-common{border-color:#9aa0a8}
+.r-rare{border-color:#4aa3ff;box-shadow:0 0 8px #4aa3ff66}
+.r-legendary{border-color:#ffb020;box-shadow:0 0 14px #ffb020aa}
+#toasts{position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;z-index:9;pointer-events:none}
+.toast{background:var(--panel);border:2px solid var(--ok);border-radius:12px;padding:10px 14px;box-shadow:0 6px 20px rgba(0,0,0,.4);animation:up2 3.2s forwards}
+@keyframes up2{0%{transform:translateY(30px);opacity:0}10%,85%{transform:none;opacity:1}100%{opacity:0}}
+.btn{font:inherit;border:1px solid var(--line);background:var(--tile);color:var(--ink);border-radius:8px;padding:6px 12px;cursor:pointer}
+.btn.danger{border-color:#d9534f;color:#ff8d89}
+textarea{width:100%;margin-top:8px;background:var(--tile);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px;font:.8rem monospace}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section class="card stage" id="stage">
+    <button class="btn" id="snd" aria-label="Activar o silenciar sonido">🔊</button>
+    <h1>Cigarro Clicker</h1>
+    <div class="total"><span id="n">0</span></div>
+    <p class="sub"><span id="cps">0</span> caladas/s · <span id="cpc">1</span> por clic</p>
+    <div id="fxbar"></div>
+    <div id="cig" role="img" aria-label="Cigarro: haz clic con el ratón o toca para dar una calada">
+      <svg id="svg" viewBox="0 0 440 90" aria-hidden="true">
+        <defs>
+          <linearGradient id="gp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#f1ece1"/><stop offset="1" stop-color="#bdb5a3"/></linearGradient>
+          <linearGradient id="gf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6c47a"/><stop offset=".5" stop-color="#d98e3c"/><stop offset="1" stop-color="#8a5016"/></linearGradient>
+          <linearGradient id="gg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0b3"/><stop offset=".5" stop-color="#c9a24a"/><stop offset="1" stop-color="#7d5f1c"/></linearGradient>
+          <linearGradient id="ga" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4a4a4f"/><stop offset=".5" stop-color="#9a9aa0"/><stop offset="1" stop-color="#d4d4d8"/></linearGradient>
+          <radialGradient id="ge" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff2a8"/><stop offset=".45" stop-color="#ff8a1f"/><stop offset="1" stop-color="#b8240a" stop-opacity="0"/></radialGradient>
+          <filter id="bl"><feGaussianBlur stdDeviation="3"/></filter>
+          <pattern id="sp" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r=".8" fill="#6b3d10" opacity=".55"/><circle cx="4.5" cy="4.5" r=".7" fill="#fbe0a8" opacity=".5"/></pattern>
+        </defs>
+        <rect x="8" y="25" width="132" height="40" rx="7" fill="url(#gf)"/>
+        <rect x="8" y="25" width="132" height="40" rx="7" fill="url(#sp)"/>
+        <rect x="136" y="25" width="12" height="40" fill="url(#gg)"/>
+        <rect x="144" y="25" width="236" height="40" fill="url(#gp)"/>
+        <rect x="144" y="28" width="236" height="4" fill="#fff" opacity=".7"/>
+        <rect x="144" y="25" width="236" height="40" fill="#000" opacity=".04"/>
+        <path d="M380 25q8 3 10 8t-3 9 4 8-9 7-2-1z" fill="#3b2a1d"/>
+        <path d="M380 25h8q18 2 28 12t0 16q-10 10-28 12h-8z" fill="url(#ga)"/>
+        <g class="glow">
+          <ellipse cx="384" cy="45" rx="16" ry="26" fill="url(#ge)" filter="url(#bl)"/>
+          <rect x="378" y="27" width="6" height="36" rx="3" fill="#ffb347"/>
+        </g>
+        <rect x="104" y="25" width="2" height="40" fill="#5b3208" opacity=".5"/><rect x="118" y="25" width="2" height="40" fill="#5b3208" opacity=".5"/>
+      </svg>
+    </div>
+  </section>
+
+  <section class="card"><h2>Mejoras de la mano</h2><div class="grid" id="hands"></div></section>
+  <section class="card"><h2>Compras</h2><div class="grid" id="shop"></div></section>
+  <section class="card">
+    <h2>Botín y equipamiento</h2>
+    <div class="grid">
+      <button class="tile" id="crate"><div class="ico">📦</div><b>Cajetilla misteriosa</b><small>Común 70% · Raro 24% · Legendario 6%</small><div class="cost"></div></button>
+      <div id="slotbox" style="display:contents"></div>
+    </div>
+    <p class="sub" id="statsum"></p>
+    <div class="grid" id="inv" style="margin-top:10px"></div>
+  </section>
+  <section class="card"><h2>Tu imperio</h2><div id="empire"></div></section>
+  <section class="card"><h2>Logros <span class="sub" id="achc"></span></h2><div class="grid" id="achs"></div></section>
+  <section class="card" style="text-align:center">
+    <p class="sub" id="saved">La partida se guarda sola.</p>
+    <span id="resetBox"></span>
+    <p><button class="btn" id="exp">Exportar copia</button> <button class="btn" id="imp">Importar copia</button></p>
+    <textarea id="code" rows="2" placeholder="Aquí aparece tu código de copia. Para importar, pégalo aquí." aria-label="Código de copia"></textarea>
+  </section>
+</div>
+<div id="toasts"></div>
+<script>
+const B=[
+ {id:"mechero",n:"Mechero",i:"🔥",d:"+1 por clic",base:15,click:1},
+ {id:"cajetilla",n:"Cajetilla",i:"📦",d:"+1 calada/s",base:100,cps:1},
+ {id:"pausa",n:"Pausa en la puerta",i:"🧑‍🤝‍🧑",d:"+5 caladas/s",base:500,cps:5},
+ {id:"estanco",n:"Estanco",i:"🏪",d:"+25 caladas/s",base:3000,cps:25},
+ {id:"fabrica",n:"Fábrica",i:"🏭",d:"+150 caladas/s",base:20000,cps:150},
+ {id:"planta",n:"Plantación",i:"🌿",d:"+800 caladas/s",base:120000,cps:800},
+ {id:"barco",n:"Cargamento",i:"🚢",d:"+5.000 caladas/s",base:1500000,cps:5000}
+];
+const H=[
+ {id:"h1",n:"Dedos ágiles",i:"🖐️",c:100},{id:"h2",n:"Pulgar de acero",i:"👍",c:500},
+ {id:"h3",n:"Manos de pianista",i:"🎹",c:5000},{id:"h4",n:"Guantes dorados",i:"🧤",c:50000},
+ {id:"h5",n:"Mano divina",i:"✨",c:500000}
+];
+const RAR={common:"Común",rare:"Raro",legendary:"Legendario"},RANK={common:0,rare:1,legendary:2},COL={common:"#9aa0a8",rare:"#4aa3ff",legendary:"#ffb020"};
+const IT=[
+ {id:"c1",n:"Mechero de plástico",i:"🔥",r:"common",s:{click:.10}},
+ {id:"c2",n:"Cenicero abollado",i:"🗑️",r:"common",s:{cps:.06}},
+ {id:"c3",n:"Gorra gastada",i:"🧢",r:"common",s:{discount:.02}},
+ {id:"c4",n:"Papel de liar",i:"🧻",r:"common",s:{goldFreq:.10}},
+ {id:"r1",n:"Zippo grabado",i:"🏮",r:"rare",s:{click:.30}},
+ {id:"r2",n:"Cenicero de cristal",i:"🔮",r:"rare",s:{cps:.20}},
+ {id:"r3",n:"Reloj de bolsillo",i:"⏱️",r:"rare",s:{goldDur:.30}},
+ {id:"r4",n:"Gafas de sol",i:"🕶️",r:"rare",s:{discount:.05}},
+ {id:"l1",n:"Mechero del dragón",i:"🐉",r:"legendary",s:{click:1}},
+ {id:"l2",n:"Pipa del capitán",i:"🏴‍☠️",r:"legendary",s:{cps:.6}},
+ {id:"l3",n:"Trébol de oro",i:"🍀",r:"legendary",s:{goldFreq:.6}},
+ {id:"l4",n:"Billetera sin fondo",i:"👛",r:"legendary",s:{discount:.10}}
+];
+const I={};IT.forEach(x=>I[x.id]=x);
+const LBL={click:"Clics +",cps:"Caladas/s +",discount:"Precios -",goldFreq:"Dorado más a menudo +",goldDur:"Dorado dura más +"};
+const A=[
+ {id:"a1",n:"Primera calada",i:"💨",d:"Haz 1 clic",f:s=>s.clicks>=1},
+ {id:"a2",n:"Fumador social",i:"🚬",d:"100 caladas",f:s=>s.total>=100},
+ {id:"a3",n:"Cadena",i:"⛓️",d:"1.000 caladas",f:s=>s.total>=1e3},
+ {id:"a4",n:"Humo denso",i:"🌫️",d:"10.000 caladas",f:s=>s.total>=1e4},
+ {id:"a5",n:"Chimenea",i:"🏭",d:"100.000 caladas",f:s=>s.total>=1e5},
+ {id:"a6",n:"Millonario del humo",i:"💰",d:"1.000.000 caladas",f:s=>s.total>=1e6},
+ {id:"a7",n:"Mil clics",i:"👆",d:"Haz 1.000 clics",f:s=>s.clicks>=1e3},
+ {id:"a8",n:"Manitas",i:"🖐️",d:"Compra una mejora de mano",f:s=>hn()>=1},
+ {id:"a9",n:"Todo en marcha",i:"⚙️",d:"Ten 1 de cada compra",f:s=>B.every(b=>(s.own[b.id]||0)>=1)},
+ {id:"a10",n:"Piloto automático",i:"🤖",d:"100 caladas/s",f:s=>cps()>=100},
+ {id:"a11",n:"Imperio",i:"👑",d:"1.000 caladas/s",f:s=>cps()>=1e3},
+ {id:"a12",n:"Coleccionista",i:"🔥",d:"10 mecheros",f:s=>(s.own.mechero||0)>=10},
+ {id:"a13",n:"Cazador de oro",i:"🌟",d:"Cobra un cigarro dorado",f:s=>s.golds>=1},
+ {id:"a14",n:"Suerte legendaria",i:"🐉",d:"Consigue un artefacto legendario",f:s=>IT.some(x=>x.r==="legendary"&&s.inv[x.id])},
+ {id:"a15",n:"Bien equipado",i:"🎒",d:"Llena los 3 huecos",f:s=>s.slots.every(Boolean)}
+];
+const KEY="cigarro-clicker-v2";
+const fresh=()=>({n:0,total:0,clicks:0,own:{},hands:{},ach:{},inv:{},slots:[null,null,null],crates:0,golds:0,mute:false});
+let S=fresh(),FX=[];
+function norm(){S.slots=(S.slots||[]).concat([null,null,null]).slice(0,3);S.inv=S.inv||{};S.own=S.own||{};S.hands=S.hands||{};S.ach=S.ach||{}}
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(fresh(),JSON.parse(r))}catch(e){}
+norm();
+const $=id=>document.getElementById(id);
+const fmt=x=>x>=1e9?(x/1e9).toFixed(2)+"B":x>=1e6?(x/1e6).toFixed(2)+"M":x>=1e4?(x/1e3).toFixed(1)+"k":Math.floor(x).toLocaleString("es");
+const lvl=id=>1+.5*((S.inv[id]||1)-1);
+const eq=k=>S.slots.reduce((a,id)=>a+(id&&I[id].s[k]?I[id].s[k]*lvl(id):0),0);
+const mult=k=>FX.filter(f=>f.k===k).reduce((a,f)=>a*f.m,1);
+const cost=b=>Math.ceil(b.base*Math.pow(1.15,S.own[b.id]||0)*(1-Math.min(.5,eq("discount"))));
+const hn=()=>H.filter(h=>S.hands[h.id]).length;
+const cpc=()=>(1+B.reduce((a,b)=>a+(b.click||0)*(S.own[b.id]||0),0))*Math.pow(2,hn())*(1+eq("click"))*mult("click");
+const cps=()=>B.reduce((a,b)=>a+(b.cps||0)*(S.own[b.id]||0),0)*(1+eq("cps"))*mult("cps");
+const crateCost=()=>Math.ceil(1000*Math.pow(1.3,S.crates));
+function gain(x){S.n+=x;S.total+=x}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));$("saved").textContent="Guardado a las "+new Date().toLocaleTimeString("es")}catch(e){$("saved").textContent="Este navegador no deja guardar: usa «Exportar copia»."}}
+function toast(m,c){const t=document.createElement("div");t.className="toast";t.textContent=m;if(c)t.style.borderColor=c;$("toasts").appendChild(t);setTimeout(()=>t.remove(),3200)}
+
+/* Sonido */
+let AC=null;
+function ac(){if(S.mute)return null;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();return AC}catch(e){return null}}
+function tone(f,d,type,v,sl,dl){const a=ac();if(!a)return;const t=a.currentTime+(dl||0),o=a.createOscillator(),g=a.createGain();o.type=type||"sine";o.frequency.setValueAtTime(f,t);if(sl)o.frequency.linearRampToValueAtTime(f+sl,t+d);g.gain.setValueAtTime(v||.12,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);o.connect(g).connect(a.destination);o.start(t);o.stop(t+d+.02)}
+function noise(d,v,fq){const a=ac();if(!a)return;const n=Math.floor(a.sampleRate*d),b=a.createBuffer(1,n,a.sampleRate),c=b.getChannelData(0);for(let i=0;i<n;i++)c[i]=Math.random()*2-1;const s=a.createBufferSource(),f=a.createBiquadFilter(),g=a.createGain();s.buffer=b;f.type="highpass";f.frequency.value=fq;g.gain.setValueAtTime(v,a.currentTime);g.gain.exponentialRampToValueAtTime(.0001,a.currentTime+d);s.connect(f).connect(g).connect(a.destination);s.start()}
+const sfx={
+ click(){noise(.06,.22,2200);tone(170+Math.random()*60,.09,"triangle",.18,-70)},
+ buy(){tone(660,.08,"square",.06);tone(990,.12,"square",.06,0,.07)},
+ ach(){[523,659,784,1047].forEach((f,i)=>tone(f,.25,"triangle",.1,0,i*.1))},
+ spawn(){tone(1300,.25,"sine",.08,300)},
+ gold(){[880,1175,1568].forEach((f,i)=>tone(f,.3,"sine",.1,0,i*.08))},
+ loot(r){const n=r==="legendary"?[392,523,659,784,1047]:r==="rare"?[523,784]:[440];n.forEach((f,i)=>tone(f,.3,"triangle",.11,0,i*.1))}
+};
+function setSnd(){$("snd").textContent=S.mute?"🔇":"🔊"}
+$("snd").onclick=()=>{S.mute=!S.mute;setSnd();save();if(!S.mute)sfx.buy()};
+
+/* Pintado */
+function buildHands(){
+  const box=$("hands");box.innerHTML="";
+  const left=H.filter(h=>!S.hands[h.id]);
+  if(!left.length){box.innerHTML='<span class="empty">Has comprado todas las mejoras de mano.</span>';return}
+  left.forEach(h=>{const t=document.createElement("button");t.className="tile hand";t.id="t-"+h.id;
+    t.innerHTML=`<div class="ico">${h.i}</div><b>${h.n}</b><small>Clics x2</small><div class="cost"></div>`;
+    t.onclick=()=>{if(S.n>=h.c){S.n-=h.c;S.hands[h.id]=1;sfx.buy();buildHands();drawStats();checkAch();save()}};
+    box.appendChild(t)});
+}
+function buildShop(){
+  const box=$("shop");box.innerHTML="";
+  B.forEach(b=>{const t=document.createElement("button");t.className="tile";t.id="t-"+b.id;
+    t.innerHTML=`<span class="own"></span><div class="ico">${b.i}</div><b>${b.n}</b><small>${b.d}</small><div class="cost"></div>`;
+    t.onclick=()=>{const c=cost(b);if(S.n>=c){S.n-=c;S.own[b.id]=(S.own[b.id]||0)+1;sfx.buy();drawEmpire();drawStats();checkAch();save()}};
+    box.appendChild(t)});
+}
+function drawEmpire(){
+  const rows=B.filter(b=>S.own[b.id]).map(b=>{const k=S.own[b.id];
+    return `<div class="row"><div class="lab">${b.i} ${b.n} ×${k}</div><div class="it">${b.i.repeat(Math.min(k,30))}${k>30?" …":""}</div></div>`}).join("");
+  $("empire").innerHTML=rows||'<span class="empty">Aún no tienes nada. Compra tu primer mechero.</span>';
+}
+function drawAch(){
+  $("achs").innerHTML=A.map(a=>`<div class="tile ach ${S.ach[a.id]?"on":""}" title="${a.d}"><div class="ico">${a.i}</div><b>${a.n}</b><small>${a.d}</small></div>`).join("");
+  $("achc").textContent="("+A.filter(a=>S.ach[a.id]).length+"/"+A.length+")";
+}
+function checkAch(){
+  let ch=false;
+  A.forEach(a=>{if(!S.ach[a.id]&&a.f(S)){S.ach[a.id]=1;ch=true;toast("🏆 Logro: "+a.n);sfx.ach()}});
+  if(ch){drawAch();save()}
+}
+const itemTxt=it=>Object.entries(it.s).map(([k,v])=>LBL[k]+Math.round(v*lvl(it.id)*100)+"%").join(", ");
+function equip(id){
+  const k=S.slots.indexOf(id);
+  if(k>=0)S.slots[k]=null;
+  else{const f=S.slots.indexOf(null);if(f<0){toast("Tienes los 3 huecos ocupados. Quita uno primero.");return}S.slots[f]=id}
+  sfx.buy();drawLoot();drawStats();checkAch();save();
+}
+function drawLoot(){
+  $("slotbox").innerHTML=S.slots.map((id,i)=>{const it=id&&I[id];
+    return it?`<button class="tile slot r-${it.r}" data-s="${i}" title="Quitar"><div class="ico">${it.i}</div><small>${it.n}</small></button>`
+    :`<div class="tile slot empty">Hueco libre</div>`}).join("");
+  document.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{S.slots[+b.dataset.s]=null;drawLoot();drawStats();save()});
+  const ids=Object.keys(S.inv).filter(id=>S.inv[id]).sort((a,b)=>RANK[I[b].r]-RANK[I[a].r]);
+  $("inv").innerHTML=ids.length?ids.map(id=>{const it=I[id],on=S.slots.includes(id);
+    return `<button class="tile r-${it.r}" data-i="${id}"><span class="own">${S.inv[id]>1?"×"+S.inv[id]:""}</span><div class="ico">${it.i}</div><b>${it.n}</b><small style="color:${COL[it.r]}">${RAR[it.r]}${on?" · equipado":""}</small><small>${itemTxt(it)}</small></button>`}).join("")
+    :'<span class="empty">Abre cajetillas misteriosas o cobra el cigarro dorado para conseguir artefactos.</span>';
+  document.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>equip(b.dataset.i));
+  const p=[["click","Clics"],["cps","Caladas/s"],["goldFreq","Dorado frecuente"],["goldDur","Dorado duradero"]].filter(([k])=>eq(k)).map(([k,l])=>l+" +"+Math.round(eq(k)*100)+"%");
+  if(eq("discount"))p.push("Precios -"+Math.round(Math.min(.5,eq("discount"))*100)+"%");
+  $("statsum").textContent=p.length?"Equipado: "+p.join(" · "):"Toca un artefacto para equiparlo (3 huecos). Los repetidos lo mejoran un 50% cada uno.";
+}
+function drawStats(){
+  $("n").textContent=fmt(S.n);$("cps").textContent=fmt(cps());$("cpc").textContent=fmt(cpc());
+  B.forEach(b=>{const t=$("t-"+b.id),c=cost(b);t.querySelector(".cost").textContent=fmt(c);t.querySelector(".own").textContent=S.own[b.id]||"";t.disabled=S.n<c});
+  H.forEach(h=>{const t=$("t-"+h.id);if(t){t.querySelector(".cost").textContent=fmt(h.c);t.disabled=S.n<h.c}});
+  const cc=crateCost();$("crate").querySelector(".cost").textContent=fmt(cc);$("crate").disabled=S.n<cc;
+}
+function drawFx(){
+  const now=Date.now();
+  $("fxbar").textContent=FX.map(f=>"⚡ "+f.n+" ("+Math.ceil((f.end-now)/1000)+" s)").join("  ");
+}
+
+/* Botín */
+function giveLoot(){
+  const r=Math.random(),rar=r<.06?"legendary":r<.30?"rare":"common",pool=IT.filter(x=>x.r===rar),it=pool[Math.floor(Math.random()*pool.length)];
+  S.inv[it.id]=(S.inv[it.id]||0)+1;
+  toast(`${it.i} ${RAR[it.r]}: ${it.n}${S.inv[it.id]>1?" (mejora ×"+S.inv[it.id]+")":""}`,COL[it.r]);
+  sfx.loot(it.r);drawLoot();checkAch();save();
+}
+$("crate").onclick=()=>{const c=crateCost();if(S.n>=c){S.n-=c;S.crates++;giveLoot();drawStats()}};
+
+/* Cigarro dorado */
+let gEl=null,gEnd=0,gNext=0;
+function sched(first){gNext=Date.now()+(first?20000+Math.random()*30000:(40000+Math.random()*60000)/(1+eq("goldFreq")))}
+function dropGold(){if(gEl){gEl.remove();gEl=null}sched()}
+function spawnGold(){
+  gEl=document.createElement("div");gEl.className="gold";gEl.setAttribute("role","img");gEl.setAttribute("aria-label","Cigarro dorado: haz clic");gEl.textContent="🚬";
+  gEl.style.left=(8+Math.random()*72)+"%";gEl.style.top=(16+Math.random()*55)+"%";
+  gEl.addEventListener("pointerdown",e=>{e.stopPropagation();e.preventDefault();clickGold()});
+  $("stage").appendChild(gEl);gEnd=Date.now()+13000*(1+eq("goldDur"));sfx.spawn();
+}
+function clickGold(){
+  dropGold();S.golds++;sfx.gold();
+  const r=Math.random(),now=Date.now();let m;
+  if(r<.45){FX.push({k:"cps",m:7,end:now+30000,n:"Frenesí ×7 caladas/s"});m="Frenesí: ×7 caladas/s durante 30 s"}
+  else if(r<.7){FX.push({k:"click",m:30,end:now+12000,n:"Clic loco ×30"});m="Clic loco: ×30 por clic durante 12 s"}
+  else{const g=Math.min(S.n*.15,cps()*900)+cpc()*13;gain(g);m="Suerte: +"+fmt(g)+" caladas"}
+  toast("🌟 "+m,"#f2b84b");
+  if(Math.random()<.4)giveLoot();
+  drawStats();checkAch();save();
+}
+
+/* Clic en el cigarro: solo ratón o toque (no teclado) */
+function fx(e){
+  const st=$("stage").getBoundingClientRect(),r=$("svg").getBoundingClientRect();
+  const p=document.createElement("div");p.className="plus";p.textContent="+"+fmt(cpc());
+  p.style.left=(e.clientX-st.left)+"px";p.style.top=(e.clientY-st.top-10)+"px";$("stage").appendChild(p);setTimeout(()=>p.remove(),900);
+  const sz=12+Math.random()*12,s=document.createElement("div");s.className="puff";
+  s.style.cssText=`width:${sz}px;height:${sz}px;left:${r.right-st.left-r.width*.06}px;top:${r.top-st.top+r.height*.2}px;--dx:${Math.random()*70-35}px`;
+  $("stage").appendChild(s);setTimeout(()=>s.remove(),1800);
+}
+$("cig").addEventListener("pointerdown",e=>{
+  if(e.button>0)return;e.preventDefault();
+  gain(cpc());S.clicks++;sfx.click();fx(e);drawStats();checkAch();
+});
+
+/* Reinicio, copia y bucle */
+function renderAll(){buildHands();buildShop();drawEmpire();drawAch();drawLoot();drawStats();setSnd()}
+function resetUI(c){
+  const box=$("resetBox");
+  if(!c){box.innerHTML='<button class="btn" id="r1">Reiniciar partida</button>';$("r1").onclick=()=>resetUI(true)}
+  else{box.innerHTML='¿Borrar todo el progreso? <button class="btn danger" id="r2">Sí, reiniciar</button> <button class="btn" id="r3">Cancelar</button>';
+    $("r2").onclick=()=>{S=fresh();FX=[];dropGold();try{localStorage.removeItem(KEY)}catch(e){}renderAll();resetUI(false);save()};
+    $("r3").onclick=()=>resetUI(false)}
+}
+$("exp").onclick=()=>{$("code").value=btoa(unescape(encodeURIComponent(JSON.stringify(S))));$("code").select();toast("Copia lista: cópiala y guárdala")};
+$("imp").onclick=()=>{try{S=Object.assign(fresh(),JSON.parse(decodeURIComponent(escape(atob($("code").value.trim())))));norm();renderAll();save();toast("Partida importada")}catch(e){toast("Código no válido","#d9534f")}};
+setInterval(()=>{
+  const now=Date.now();FX=FX.filter(f=>f.end>now);
+  const v=cps()/10;if(v){gain(v)}
+  if(gEl&&now>gEnd)dropGold();
+  else if(!gEl&&now>gNext)spawnGold();
+  drawStats();drawFx();checkAch();
+},100);
+setInterval(save,3000);
+window.addEventListener("pagehide",save);
+document.addEventListener("visibilitychange",()=>{if(document.hidden)save()});
+renderAll();resetUI(false);sched(true);
+</script>
+</body>
+</html>
