@@ -14,7 +14,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:Georgia,"Times N
 .wrap{max-width:960px;margin:0 auto;padding:14px;display:grid;gap:14px}
 .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
 h2{margin:0 0 10px;font-size:1.1rem}
-.stage{text-align:center;position:relative;overflow:hidden;user-select:none;-webkit-user-select:none;background:radial-gradient(ellipse at 80% 60%,rgba(255,106,26,.22),transparent 60%),var(--panel)}
+.stage{text-align:center;position:relative;overflow:hidden;user-select:none;-webkit-user-select:none;background:radial-gradient(ellipse at 80% 60%,var(--glow,rgba(255,106,26,.22)),transparent 60%),var(--panel)}
 h1{font-size:1.5rem;margin:0}
 .total{font-size:2.6rem;font-weight:700;margin:6px 0 0;font-variant-numeric:tabular-nums}
 .sub{color:var(--mute);margin:2px 0 0}
@@ -25,7 +25,7 @@ h1{font-size:1.5rem;margin:0}
 #cig:active svg{transform:rotate(-9deg) scale(.96)}
 .glow{animation:glow 1.4s ease-in-out infinite alternate}
 @keyframes glow{from{opacity:.7}to{opacity:1}}
-.puff{position:absolute;pointer-events:none;border-radius:50%;background:radial-gradient(circle,#cfcfd6,#8f8f99);filter:blur(4px);opacity:.55;animation:rise 1.8s ease-out forwards}
+.puff{position:absolute;pointer-events:none;border-radius:50%;background:radial-gradient(circle,var(--sm1,#cfcfd6),var(--sm2,#8f8f99));filter:blur(4px);opacity:.55;animation:rise 1.8s ease-out forwards}
 @keyframes rise{to{transform:translate(var(--dx),-150px) scale(3.2);opacity:0}}
 .plus{position:absolute;pointer-events:none;font-weight:700;color:var(--gold);text-shadow:0 1px 3px #000;animation:up .9s ease-out forwards}
 @keyframes up{to{transform:translateY(-60px);opacity:0}}
@@ -54,6 +54,16 @@ button:focus-visible{outline:3px solid var(--ember)}
 .r-common{border-color:#9aa0a8}
 .r-rare{border-color:#4aa3ff;box-shadow:0 0 8px #4aa3ff66}
 .r-legendary{border-color:#ffb020;box-shadow:0 0 14px #ffb020aa}
+.cname{display:block;margin:4px auto 0;width:min(100%,320px);background:transparent;border:0;border-bottom:2px dashed var(--line);border-radius:0;color:var(--ink);font:inherit;font-size:1.15rem;text-align:center;padding:4px 6px}
+.cname::placeholder{color:var(--mute)}
+.cname:focus{outline:none;border-bottom:2px solid var(--ember);box-shadow:0 6px 10px -8px var(--ember)}
+#skins{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))}
+.skin svg{display:block;width:100%;height:auto;margin-bottom:6px}
+.skin[aria-pressed="true"]{outline:2px solid var(--ok);outline-offset:2px}
+.skin.locked{pointer-events:none;opacity:.75}
+.skin.locked svg{filter:grayscale(1) brightness(.45)}
+.scroll{max-height:460px;overflow:auto;padding:2px}
+.scroll:focus-visible{outline:3px solid var(--ember)}
 #toasts{position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;z-index:9;pointer-events:none}
 .toast{background:var(--panel);border:2px solid var(--ok);border-radius:12px;padding:10px 14px;box-shadow:0 6px 20px rgba(0,0,0,.4);animation:up2 3.2s forwards}
 @keyframes up2{0%{transform:translateY(30px);opacity:0}10%,85%{transform:none;opacity:1}100%{opacity:0}}
@@ -70,31 +80,9 @@ textarea{width:100%;margin-top:8px;background:var(--tile);color:var(--ink);borde
     <div class="total"><span id="n">0</span></div>
     <p class="sub"><span id="cps">0</span> caladas/s · <span id="cpc">1</span> por clic</p>
     <div id="fxbar"></div>
+    <input id="cn" class="cname" maxlength="20" placeholder="✏️ Ponle nombre a tu cigarro" aria-label="Nombre del cigarro" autocomplete="off" spellcheck="false">
     <div id="cig" role="img" aria-label="Cigarro: haz clic con el ratón o toca para dar una calada">
-      <svg id="svg" viewBox="0 0 440 90" aria-hidden="true">
-        <defs>
-          <linearGradient id="gp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".45" stop-color="#f1ece1"/><stop offset="1" stop-color="#bdb5a3"/></linearGradient>
-          <linearGradient id="gf" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f6c47a"/><stop offset=".5" stop-color="#d98e3c"/><stop offset="1" stop-color="#8a5016"/></linearGradient>
-          <linearGradient id="gg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0b3"/><stop offset=".5" stop-color="#c9a24a"/><stop offset="1" stop-color="#7d5f1c"/></linearGradient>
-          <linearGradient id="ga" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#4a4a4f"/><stop offset=".5" stop-color="#9a9aa0"/><stop offset="1" stop-color="#d4d4d8"/></linearGradient>
-          <radialGradient id="ge" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#fff2a8"/><stop offset=".45" stop-color="#ff8a1f"/><stop offset="1" stop-color="#b8240a" stop-opacity="0"/></radialGradient>
-          <filter id="bl"><feGaussianBlur stdDeviation="3"/></filter>
-          <pattern id="sp" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r=".8" fill="#6b3d10" opacity=".55"/><circle cx="4.5" cy="4.5" r=".7" fill="#fbe0a8" opacity=".5"/></pattern>
-        </defs>
-        <rect x="8" y="25" width="132" height="40" rx="7" fill="url(#gf)"/>
-        <rect x="8" y="25" width="132" height="40" rx="7" fill="url(#sp)"/>
-        <rect x="136" y="25" width="12" height="40" fill="url(#gg)"/>
-        <rect x="144" y="25" width="236" height="40" fill="url(#gp)"/>
-        <rect x="144" y="28" width="236" height="4" fill="#fff" opacity=".7"/>
-        <rect x="144" y="25" width="236" height="40" fill="#000" opacity=".04"/>
-        <path d="M380 25q8 3 10 8t-3 9 4 8-9 7-2-1z" fill="#3b2a1d"/>
-        <path d="M380 25h8q18 2 28 12t0 16q-10 10-28 12h-8z" fill="url(#ga)"/>
-        <g class="glow">
-          <ellipse cx="384" cy="45" rx="16" ry="26" fill="url(#ge)" filter="url(#bl)"/>
-          <rect x="378" y="27" width="6" height="36" rx="3" fill="#ffb347"/>
-        </g>
-        <rect x="104" y="25" width="2" height="40" fill="#5b3208" opacity=".5"/><rect x="118" y="25" width="2" height="40" fill="#5b3208" opacity=".5"/>
-      </svg>
+      <svg id="svg" viewBox="0 0 440 90" aria-hidden="true"></svg>
     </div>
   </section>
 
@@ -109,8 +97,9 @@ textarea{width:100%;margin-top:8px;background:var(--tile);color:var(--ink);borde
     <p class="sub" id="statsum"></p>
     <div class="grid" id="inv" style="margin-top:10px"></div>
   </section>
+  <section class="card"><h2>Aspecto del cigarro <span class="sub" id="skc"></span></h2><p class="sub" style="margin-bottom:10px">Las skins son solo estética y se desbloquean jugando.</p><div class="grid" id="skins"></div></section>
   <section class="card"><h2>Tu imperio</h2><div id="empire"></div></section>
-  <section class="card"><h2>Logros <span class="sub" id="achc"></span></h2><div class="grid" id="achs"></div></section>
+  <section class="card"><h2>Logros <span class="sub" id="achc"></span></h2><div class="grid scroll" id="achs" tabindex="0" aria-label="Lista de logros"></div></section>
   <section class="card" style="text-align:center">
     <p class="sub" id="saved">La partida se guarda sola.</p>
     <span id="resetBox"></span>
@@ -151,6 +140,73 @@ const IT=[
 ];
 const I={};IT.forEach(x=>I[x.id]=x);
 const LBL={click:"Clics +",cps:"Caladas/s +",discount:"Precios -",goldFreq:"Dorado más a menudo +",goldDur:"Dorado dura más +"};
+const hexA=(h,a)=>{const n=parseInt(h.slice(1),16);return `rgba(${n>>16&255},${n>>8&255},${n&255},${a})`};
+const nb=()=>B.reduce((a,b)=>a+(S.own[b.id]||0),0);
+const SD={paper:["#ffffff","#f1ece1","#bdb5a3"],filt:["#f6c47a","#d98e3c","#8a5016"],ring:["#fff0b3","#c9a24a","#7d5f1c"],ash:["#4a4a4f","#9a9aa0","#d4d4d8"],ember:["#fff2a8","#ff8a1f","#b8240a"],coal:"#ffb347",smoke:["#cfcfd6","#8f8f99"]};
+const mk=(id,n,r,hint,ok,o)=>Object.assign({id,n,r,hint,ok},SD,o||{});
+const SK=[
+ mk("clasico","Clásico","common","La de siempre",s=>true),
+ mk("menta","Mentolado","common","Consigue 5.000 caladas",s=>s.total>=5e3,{paper:["#f4fffa","#cdeee0","#8fbfae"],filt:["#e9f7ff","#a9d6ea","#5e93ad"],ring:["#e6fff6","#9bd9c0","#4f8f7b"],ember:["#d9fff5","#4fe0c0","#0b6b5a"],coal:"#7ff5da",smoke:["#d8fff3","#8fcfbf"],
+  deco:u=>`<rect x="160" y="25" width="8" height="40" fill="#4fb89a" opacity=".55"/><rect x="172" y="25" width="2" height="40" fill="#4fb89a" opacity=".55"/>`}),
+ mk("caramelo","Caramelo","common","Haz 500 clics",s=>s.clicks>=500,{paper:["#ffffff","#ffeef0","#e8b8be"],filt:["#ffd1dc","#ff8fab","#c9486a"],
+  deco:u=>{let t="";for(let x=104;x<400;x+=34)t+=`<polygon points="${x},65 ${x+14},65 ${x+54},25 ${x+40},25" fill="#e63946" opacity=".85"/>`;return t}}),
+ mk("habano","Habano","common","Ten 5 estancos",s=>(s.own.estanco||0)>=5,{paper:["#c68a4a","#8a5a2c","#4a2c12"],filt:["#a8723a","#7a4a22","#3d230e"],ring:["#ff8a8a","#d62828","#7a1010"],smoke:["#d8cfc4","#8a7f74"],
+  deco:u=>`<path d="M144 38q20-6 40 0t40 0t40 0t40 0t40 0t32 0" stroke="#2f1a0a" stroke-opacity=".4" fill="none"/><path d="M144 54q20-6 40 0t40 0t40 0t40 0t40 0t32 0" stroke="#2f1a0a" stroke-opacity=".3" fill="none"/><rect x="250" y="25" width="16" height="40" fill="#d62828"/><rect x="250" y="25" width="16" height="4" fill="#ffd36b"/><rect x="250" y="61" width="16" height="4" fill="#ffd36b"/><circle cx="258" cy="45" r="5" fill="#ffd36b"/>`}),
+ mk("hielo","Hielo","rare","Llena los 3 huecos de equipamiento",s=>s.slots.every(Boolean),{paper:["#ffffff","#dff3ff","#9cc7e6"],filt:["#e8f7ff","#8cc8f0","#3f7fb8"],ring:["#f4fbff","#a8d4ee","#5d8fb4"],ember:["#f0ffff","#4db8ff","#0a3a8a"],coal:"#8fdcff",smoke:["#e6f6ff","#9ac6e8"],
+  deco:u=>`<path d="M170 25L200 65M230 25L205 65M270 25L300 65M335 25L312 65" stroke="#fff" stroke-width="1.5" opacity=".6" fill="none"/><circle cx="215" cy="38" r="2" fill="#fff"/><circle cx="288" cy="52" r="2.5" fill="#fff"/><circle cx="345" cy="36" r="1.8" fill="#fff"/>`}),
+ mk("neon","Neón","rare","Llega a 100 caladas/s",s=>cpsBase()>=100,{paper:["#2b2f5e","#171a3d","#0a0b22"],filt:["#ff7ce5","#c722a8","#6b0f60"],ring:["#9ffcff","#22d3ee","#0a6f86"],ash:["#2b2f5e","#6b73c9","#aab2ff"],ember:["#ffffff","#22e8ff","#0a3fff"],coal:"#7df6ff",smoke:["#9ffcff","#6a5cff"],
+  deco:u=>`<rect x="144" y="29" width="236" height="7" fill="#22e8ff" opacity=".6" filter="url(#bl${u})"/><rect x="144" y="31" width="236" height="3" fill="#7df6ff"/><rect x="144" y="54" width="236" height="7" fill="#ff3dd8" opacity=".6" filter="url(#bl${u})"/><rect x="144" y="56" width="236" height="3" fill="#ff8ae8"/>`}),
+ mk("carbon","Negro de lujo","rare","Consigue 1.000.000 de caladas",s=>s.total>=1e6,{paper:["#4a4a52","#26262c","#0f0f13"],filt:["#f2d27a","#c9a24a","#7d5f1c"],ring:["#fff0b3","#e0b84e","#7d5f1c"],ash:["#2a2a2e","#5a5a62","#8c8c94"],smoke:["#9a9aa4","#4a4a55"],
+  deco:u=>`<rect x="165" y="25" width="5" height="40" fill="#e0b84e"/><rect x="176" y="25" width="2" height="40" fill="#e0b84e" opacity=".8"/><rect x="144" y="44" width="236" height="1.5" fill="#e0b84e" opacity=".35"/>`}),
+ mk("dragon","Dragón","legendary","Consigue un artefacto legendario",s=>IT.some(x=>x.r==="legendary"&&s.inv[x.id]),{paper:["#7fe08a","#2f9e4a","#124d24"],filt:["#ffb347","#d9541a","#7a1c06"],ash:["#3a2a2a","#7a5a4a","#b89a8a"],ember:["#fff2a8","#ff4d1a","#7a0a0a"],coal:"#ff7a3a",smoke:["#ffc9a0","#8f6a5a"],
+  deco:u=>`<pattern id="sc${u}" width="16" height="12" patternUnits="userSpaceOnUse"><path d="M0 12a8 8 0 0 1 16 0M-8 6a8 8 0 0 1 16 0M8 6a8 8 0 0 1 16 0" fill="none" stroke="#0b3a17" stroke-opacity=".6" stroke-width="1.4"/></pattern><rect x="144" y="25" width="236" height="40" fill="url(#sc${u})"/>`}),
+ mk("oro","Edición de oro","legendary","Cobra 5 cigarros dorados",s=>s.golds>=5,{paper:["#fff6c2","#f2b84b","#a8730f"],filt:["#fff0b3","#d9a22e","#7d5f1c"],ring:["#ffffff","#fff0b3","#c9a24a"],smoke:["#fff0b3","#c9a24a"],
+  deco:u=>`<polygon points="190,65 205,65 245,25 230,25" fill="#fff" opacity=".4"/><polygon points="260,65 266,65 306,25 300,25" fill="#fff" opacity=".3"/>`}),
+ mk("arcoiris","Arcoíris","legendary","Consigue 10.000.000 de caladas",s=>s.total>=1e7,{filt:["#ffffff","#e6e6ee","#a6a6b6"],ring:["#ffffff","#eeeeee","#bbbbbb"],smoke:["#ffd1f0","#b9a5ff"],
+  deco:u=>`<linearGradient id="rb${u}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff4d4d"/><stop offset=".2" stop-color="#ffb02e"/><stop offset=".4" stop-color="#ffe14d"/><stop offset=".6" stop-color="#4dd27a"/><stop offset=".8" stop-color="#4da3ff"/><stop offset="1" stop-color="#b44dff"/></linearGradient><rect x="144" y="25" width="236" height="40" fill="url(#rb${u})" opacity=".85"/>`}),
+ mk("galaxia","Galaxia","legendary","Consigue 100.000.000 de caladas",s=>s.total>=1e8,{paper:["#5b3fa8","#2a1860","#0b0524"],filt:["#c9a8ff","#7a52d6","#2e1a74"],ring:["#e8dcff","#a98cff","#4d3a9a"],ember:["#ffffff","#ff9bf0","#5a1fa8"],coal:"#ff9bf0",smoke:["#d9c8ff","#6b4fc0"],
+  deco:u=>{let t=`<radialGradient id="nb${u}"><stop offset="0" stop-color="#ff6bd6" stop-opacity=".7"/><stop offset="1" stop-color="#ff6bd6" stop-opacity="0"/></radialGradient><radialGradient id="nc${u}"><stop offset="0" stop-color="#4dd8ff" stop-opacity=".6"/><stop offset="1" stop-color="#4dd8ff" stop-opacity="0"/></radialGradient><ellipse cx="300" cy="45" rx="62" ry="24" fill="url(#nb${u})"/><ellipse cx="195" cy="44" rx="50" ry="20" fill="url(#nc${u})"/>`;for(let i=0;i<44;i++)t+=`<circle cx="${150+(i*97)%226}" cy="${27+(i*53)%36}" r="${(.6+(i%3)*.5).toFixed(1)}" fill="#fff" opacity="${(.45+(i%4)*.15).toFixed(2)}"/>`;return t}})
+];
+const SKM={};SK.forEach(k=>SKM[k.id]=k);
+function cigInner(k,u,anim){
+  const grad=(id,c,h,m)=>`<linearGradient id="${id}${u}" x1="0" y1="0" x2="${h?1:0}" y2="${h?0:1}"><stop offset="0" stop-color="${c[0]}"/><stop offset="${m}" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[2]}"/></linearGradient>`;
+  const E=k.ember;
+  return `<defs>${grad("gp",k.paper,0,.45)}${grad("gf",k.filt,0,.5)}${grad("gg",k.ring,0,.5)}${grad("ga",k.ash,1,.5)}
+<radialGradient id="ge${u}" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="${E[0]}"/><stop offset=".45" stop-color="${E[1]}"/><stop offset="1" stop-color="${E[2]}" stop-opacity="0"/></radialGradient>
+<filter id="bl${u}"><feGaussianBlur stdDeviation="3"/></filter>
+<pattern id="sp${u}" width="6" height="6" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r=".8" fill="#6b3d10" opacity=".55"/><circle cx="4.5" cy="4.5" r=".7" fill="#fbe0a8" opacity=".5"/></pattern>
+<clipPath id="cp${u}"><rect x="144" y="25" width="236" height="40"/></clipPath></defs>
+<rect x="8" y="25" width="132" height="40" rx="7" fill="url(#gf${u})"/>
+<rect x="8" y="25" width="132" height="40" rx="7" fill="url(#sp${u})"/>
+<rect x="136" y="25" width="12" height="40" fill="url(#gg${u})"/>
+<rect x="144" y="25" width="236" height="40" fill="url(#gp${u})"/>
+<g clip-path="url(#cp${u})">${k.deco?k.deco(u):""}</g>
+<rect x="144" y="28" width="236" height="4" fill="#fff" opacity=".55"/>
+<rect x="144" y="25" width="236" height="40" fill="#000" opacity=".04"/>
+<path d="M380 25q8 3 10 8t-3 9 4 8-9 7-2-1z" fill="#3b2a1d"/>
+<path d="M380 25h8q18 2 28 12t0 16q-10 10-28 12h-8z" fill="url(#ga${u})"/>
+<g${anim?' class="glow"':""}><ellipse cx="384" cy="45" rx="16" ry="26" fill="url(#ge${u})" filter="url(#bl${u})"/><rect x="378" y="27" width="6" height="36" rx="3" fill="${k.coal}"/></g>
+<rect x="104" y="25" width="2" height="40" fill="#5b3208" opacity=".5"/><rect x="118" y="25" width="2" height="40" fill="#5b3208" opacity=".5"/>`;
+}
+function applySkin(){
+  const k=SKM[S.skin]||SKM.clasico;$("svg").innerHTML=cigInner(k,"m",true);
+  const st=$("stage").style;st.setProperty("--sm1",k.smoke[0]);st.setProperty("--sm2",k.smoke[1]);st.setProperty("--glow",hexA(k.ember[1],.22));
+}
+function drawSkins(){
+  $("skins").innerHTML=SK.map(k=>{
+    const own=S.skins[k.id],on=S.skin===k.id,mini=`<svg viewBox="0 0 440 90" aria-hidden="true">${cigInner(k,k.id,false)}</svg>`;
+    return own?`<button class="tile skin r-${k.r}" data-k="${k.id}" aria-pressed="${on}">${mini}<b>${k.n}</b><small style="color:${COL[k.r]}">${RAR[k.r]}${on?" · puesta":""}</small></button>`
+      :`<div class="tile skin locked r-${k.r}">${mini}<b>🔒 ${k.n}</b><small>${k.hint}</small></div>`}).join("");
+  document.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{S.skin=b.dataset.k;applySkin();drawSkins();sfx.buy();checkAch();save()});
+  $("skc").textContent="("+SK.filter(k=>S.skins[k.id]).length+"/"+SK.length+")";
+}
+function checkSkins(){
+  const nw=SK.filter(k=>!S.skins[k.id]&&k.ok(S));
+  if(!nw.length)return;
+  nw.forEach(k=>S.skins[k.id]=1);
+  if(nw.length<=2)nw.forEach(k=>toast("🎨 Skin desbloqueada: "+k.n,COL[k.r]));else toast("🎨 "+nw.length+" skins nuevas desbloqueadas","#f2b84b");
+  sfx.loot("rare");drawSkins();save();
+}
 const A=[
  {id:"a1",n:"Primera calada",i:"💨",d:"Haz 1 clic",f:s=>s.clicks>=1},
  {id:"a2",n:"Fumador social",i:"🚬",d:"100 caladas",f:s=>s.total>=100},
@@ -166,12 +222,46 @@ const A=[
  {id:"a12",n:"Coleccionista",i:"🔥",d:"10 mecheros",f:s=>(s.own.mechero||0)>=10},
  {id:"a13",n:"Cazador de oro",i:"🌟",d:"Cobra un cigarro dorado",f:s=>s.golds>=1},
  {id:"a14",n:"Suerte legendaria",i:"🐉",d:"Consigue un artefacto legendario",f:s=>IT.some(x=>x.r==="legendary"&&s.inv[x.id])},
- {id:"a15",n:"Bien equipado",i:"🎒",d:"Llena los 3 huecos",f:s=>s.slots.every(Boolean)}
+ {id:"a15",n:"Bien equipado",i:"🎒",d:"Llena los 3 huecos",f:s=>s.slots.every(Boolean)},
+ {id:"a16",n:"Fumadero industrial",i:"🏗️",d:"10.000.000 caladas",f:s=>s.total>=1e7},
+ {id:"a17",n:"Humo hasta el cielo",i:"🌤️",d:"100.000.000 caladas",f:s=>s.total>=1e8},
+ {id:"a18",n:"Eclipse de humo",i:"🌑",d:"1.000.000.000 caladas",f:s=>s.total>=1e9},
+ {id:"a19",n:"Dedo caliente",i:"☝️",d:"Haz 100 clics",f:s=>s.clicks>=100},
+ {id:"a20",n:"Callo en el dedo",i:"🩹",d:"Haz 10.000 clics",f:s=>s.clicks>=1e4},
+ {id:"a21",n:"Dedo de acero",i:"🦾",d:"Haz 100.000 clics",f:s=>s.clicks>=1e5},
+ {id:"a22",n:"Ráfaga",i:"⚡",d:"10 clics en 1 segundo",f:s=>s.fast>0},
+ {id:"a23",n:"Locomotora",i:"🚂",d:"10.000 caladas/s",f:s=>cpsBase()>=1e4},
+ {id:"a24",n:"Volcán",i:"🌋",d:"100.000 caladas/s",f:s=>cpsBase()>=1e5},
+ {id:"a25",n:"Calada profunda",i:"🫁",d:"100 por clic",f:s=>cpcBase()>=100},
+ {id:"a26",n:"Tornado",i:"🌪️",d:"2.000 por clic",f:s=>cpcBase()>=2e3},
+ {id:"a27",n:"Cartón completo",i:"📦",d:"Ten 10 cajetillas",f:s=>(s.own.cajetilla||0)>=10},
+ {id:"a28",n:"Agricultor",i:"🌿",d:"Compra una plantación",f:s=>(s.own.planta||0)>=1},
+ {id:"a29",n:"Contrabandista",i:"🚢",d:"Compra un cargamento",f:s=>(s.own.barco||0)>=1},
+ {id:"a30",n:"Expansión",i:"🗺️",d:"50 compras en total",f:s=>nb()>=50},
+ {id:"a31",n:"Multinacional",i:"🌍",d:"200 compras en total",f:s=>nb()>=200},
+ {id:"a32",n:"Manos de oro",i:"🧤",d:"Compra todas las mejoras de mano",f:s=>H.every(h=>s.hands[h.id])},
+ {id:"a33",n:"Cazador experto",i:"🎯",d:"Cobra 10 cigarros dorados",f:s=>s.golds>=10},
+ {id:"a34",n:"Fiebre del oro",i:"🤑",d:"Cobra 50 cigarros dorados",f:s=>s.golds>=50},
+ {id:"a35",n:"Primera cajetilla",i:"🎁",d:"Abre una cajetilla misteriosa",f:s=>s.crates>=1},
+ {id:"a36",n:"Adicto al botín",i:"🎰",d:"Abre 10 cajetillas misteriosas",f:s=>s.crates>=10},
+ {id:"a37",n:"Coleccionista de artefactos",i:"🗃️",d:"Ten 8 artefactos distintos",f:s=>Object.keys(s.inv).filter(k=>s.inv[k]>0).length>=8},
+ {id:"a38",n:"Colección completa",i:"🏛️",d:"Ten los 12 artefactos",f:s=>IT.every(x=>s.inv[x.id])},
+ {id:"a39",n:"Bien pulido",i:"✨",d:"Ten 3 copias de un artefacto",f:s=>IT.some(x=>(s.inv[x.id]||0)>=3)},
+ {id:"a40",n:"Bautizo",i:"🍼",d:"Ponle nombre a tu cigarro",f:s=>s.name.trim().length>0},
+ {id:"a41",n:"Nuevo look",i:"🎨",d:"Ponle una skin al cigarro",f:s=>s.skin!=="clasico"},
+ {id:"a42",n:"Fashionista",i:"👗",d:"Desbloquea 5 skins",f:s=>Object.keys(s.skins).length>=5},
+ {id:"a43",n:"Armario completo",i:"🧥",d:"Desbloquea todas las skins",f:s=>SK.every(k=>s.skins[k.id])},
+ {id:"a44",n:"Un ratito",i:"⏳",d:"Juega 10 minutos",f:s=>s.secs>=600},
+ {id:"a45",n:"Maratón",i:"🏃",d:"Juega 1 hora",f:s=>s.secs>=3600},
+ {id:"a46",n:"Insomnio",i:"🌙",d:"Juega entre las 0:00 y las 5:00",secret:1,f:s=>new Date().getHours()<5},
+ {id:"a47",n:"Modo ninja",i:"🥷",d:"Silencia el sonido",secret:1,f:s=>s.mute}
 ];
 const KEY="cigarro-clicker-v2";
-const fresh=()=>({n:0,total:0,clicks:0,own:{},hands:{},ach:{},inv:{},slots:[null,null,null],crates:0,golds:0,mute:false});
+const fresh=()=>({n:0,total:0,clicks:0,own:{},hands:{},ach:{},inv:{},slots:[null,null,null],crates:0,golds:0,mute:false,name:"",skin:"clasico",skins:{clasico:1},secs:0,fast:0});
 let S=fresh(),FX=[];
-function norm(){S.slots=(S.slots||[]).concat([null,null,null]).slice(0,3);S.inv=S.inv||{};S.own=S.own||{};S.hands=S.hands||{};S.ach=S.ach||{}}
+function norm(){S.slots=(S.slots||[]).concat([null,null,null]).slice(0,3);S.inv=S.inv||{};S.own=S.own||{};S.hands=S.hands||{};S.ach=S.ach||{};
+  S.skins=(S.skins&&typeof S.skins==="object")?S.skins:{};S.skins.clasico=1;if(!SKM[S.skin]||!S.skins[S.skin])S.skin="clasico";
+  S.name=typeof S.name==="string"?S.name.slice(0,20):"";S.secs=+S.secs||0;S.fast=S.fast?1:0}
 try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(fresh(),JSON.parse(r))}catch(e){}
 norm();
 const $=id=>document.getElementById(id);
@@ -181,8 +271,10 @@ const eq=k=>S.slots.reduce((a,id)=>a+(id&&I[id].s[k]?I[id].s[k]*lvl(id):0),0);
 const mult=k=>FX.filter(f=>f.k===k).reduce((a,f)=>a*f.m,1);
 const cost=b=>Math.ceil(b.base*Math.pow(1.15,S.own[b.id]||0)*(1-Math.min(.5,eq("discount"))));
 const hn=()=>H.filter(h=>S.hands[h.id]).length;
-const cpc=()=>(1+B.reduce((a,b)=>a+(b.click||0)*(S.own[b.id]||0),0))*Math.pow(2,hn())*(1+eq("click"))*mult("click");
-const cps=()=>B.reduce((a,b)=>a+(b.cps||0)*(S.own[b.id]||0),0)*(1+eq("cps"))*mult("cps");
+const cpcBase=()=>(1+B.reduce((a,b)=>a+(b.click||0)*(S.own[b.id]||0),0))*Math.pow(2,hn())*(1+eq("click"));
+const cpc=()=>cpcBase()*mult("click");
+const cpsBase=()=>B.reduce((a,b)=>a+(b.cps||0)*(S.own[b.id]||0),0)*(1+eq("cps"));
+const cps=()=>cpsBase()*mult("cps");
 const crateCost=()=>Math.ceil(1000*Math.pow(1.3,S.crates));
 function gain(x){S.n+=x;S.total+=x}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));$("saved").textContent="Guardado a las "+new Date().toLocaleTimeString("es")}catch(e){$("saved").textContent="Este navegador no deja guardar: usa «Exportar copia»."}}
@@ -227,13 +319,17 @@ function drawEmpire(){
   $("empire").innerHTML=rows||'<span class="empty">Aún no tienes nada. Compra tu primer mechero.</span>';
 }
 function drawAch(){
-  $("achs").innerHTML=A.map(a=>`<div class="tile ach ${S.ach[a.id]?"on":""}" title="${a.d}"><div class="ico">${a.i}</div><b>${a.n}</b><small>${a.d}</small></div>`).join("");
+  $("achs").innerHTML=A.map(a=>{const on=S.ach[a.id],hid=a.secret&&!on;
+    return `<div class="tile ach ${on?"on":""}" title="${hid?"Logro secreto":a.d}"><div class="ico">${hid?"❔":a.i}</div><b>${hid?"Logro secreto":a.n}</b><small>${hid?"Descúbrelo jugando":a.d}</small></div>`}).join("");
   $("achc").textContent="("+A.filter(a=>S.ach[a.id]).length+"/"+A.length+")";
 }
 function checkAch(){
-  let ch=false;
-  A.forEach(a=>{if(!S.ach[a.id]&&a.f(S)){S.ach[a.id]=1;ch=true;toast("🏆 Logro: "+a.n);sfx.ach()}});
-  if(ch){drawAch();save()}
+  checkSkins();
+  const got=A.filter(a=>!S.ach[a.id]&&a.f(S));
+  if(!got.length)return;
+  got.forEach(a=>S.ach[a.id]=1);
+  if(got.length<=3)got.forEach(a=>toast("🏆 Logro: "+a.n));else toast("🏆 "+got.length+" logros nuevos");
+  sfx.ach();drawAch();save();
 }
 const itemTxt=it=>Object.entries(it.s).map(([k,v])=>LBL[k]+Math.round(v*lvl(it.id)*100)+"%").join(", ");
 function equip(id){
@@ -298,6 +394,7 @@ function clickGold(){
 }
 
 /* Clic en el cigarro: solo ratón o toque (no teclado) */
+const CT=[];
 function fx(e){
   const st=$("stage").getBoundingClientRect(),r=$("svg").getBoundingClientRect();
   const p=document.createElement("div");p.className="plus";p.textContent="+"+fmt(cpc());
@@ -308,11 +405,12 @@ function fx(e){
 }
 $("cig").addEventListener("pointerdown",e=>{
   if(e.button>0)return;e.preventDefault();
+  const t=Date.now();CT.push(t);while(CT.length&&t-CT[0]>1000)CT.shift();if(CT.length>=10)S.fast=1;
   gain(cpc());S.clicks++;sfx.click();fx(e);drawStats();checkAch();
 });
 
 /* Reinicio, copia y bucle */
-function renderAll(){buildHands();buildShop();drawEmpire();drawAch();drawLoot();drawStats();setSnd()}
+function renderAll(){$("cn").value=S.name;applySkin();buildHands();buildShop();drawEmpire();drawAch();drawLoot();drawSkins();drawStats();setSnd()}
 function resetUI(c){
   const box=$("resetBox");
   if(!c){box.innerHTML='<button class="btn" id="r1">Reiniciar partida</button>';$("r1").onclick=()=>resetUI(true)}
@@ -324,6 +422,7 @@ $("exp").onclick=()=>{$("code").value=btoa(unescape(encodeURIComponent(JSON.stri
 $("imp").onclick=()=>{try{S=Object.assign(fresh(),JSON.parse(decodeURIComponent(escape(atob($("code").value.trim())))));norm();renderAll();save();toast("Partida importada")}catch(e){toast("Código no válido","#d9534f")}};
 setInterval(()=>{
   const now=Date.now();FX=FX.filter(f=>f.end>now);
+  if(!document.hidden)S.secs+=.1;
   const v=cps()/10;if(v){gain(v)}
   if(gEl&&now>gEnd)dropGold();
   else if(!gEl&&now>gNext)spawnGold();
@@ -332,6 +431,9 @@ setInterval(()=>{
 setInterval(save,3000);
 window.addEventListener("pagehide",save);
 document.addEventListener("visibilitychange",()=>{if(document.hidden)save()});
+$("cn").addEventListener("input",e=>{S.name=e.target.value.slice(0,20);checkAch()});
+$("cn").addEventListener("change",save);
+$("cn").addEventListener("keydown",e=>{if(e.key==="Enter")e.target.blur()});
 renderAll();resetUI(false);sched(true);
 </script>
 </body>
