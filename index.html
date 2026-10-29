@@ -64,6 +64,16 @@ button:focus-visible{outline:3px solid var(--ember)}
 .skin.locked svg{filter:grayscale(1) brightness(.45)}
 .scroll{max-height:460px;overflow:auto;padding:2px}
 .scroll:focus-visible{outline:3px solid var(--ember)}
+html,body{touch-action:manipulation;-webkit-text-size-adjust:100%}
+.stage,.tile,.btn{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.cname,textarea{-webkit-user-select:text;user-select:text}
+.btn{min-height:44px;min-width:44px}
+.cname{min-height:44px}
+#hats{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+.hat svg{display:block;width:100%;height:auto;margin-bottom:6px}
+.hat[aria-pressed="true"]{outline:2px solid var(--ok);outline-offset:2px}
+.hat.locked{pointer-events:none;opacity:.75}
+.hat.locked svg{filter:grayscale(1) brightness(.45)}
 #toasts{position:fixed;right:12px;bottom:calc(12px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:8px;z-index:9;pointer-events:none}
 .toast{background:var(--panel);border:2px solid var(--ok);border-radius:12px;padding:10px 14px;box-shadow:0 6px 20px rgba(0,0,0,.4);animation:up2 3.2s forwards}
 @keyframes up2{0%{transform:translateY(30px);opacity:0}10%,85%{transform:none;opacity:1}100%{opacity:0}}
@@ -82,7 +92,7 @@ textarea{width:100%;margin-top:8px;background:var(--tile);color:var(--ink);borde
     <div id="fxbar"></div>
     <input id="cn" class="cname" maxlength="20" placeholder="✏️ Ponle nombre a tu cigarro" aria-label="Nombre del cigarro" autocomplete="off" spellcheck="false">
     <div id="cig" role="img" aria-label="Cigarro: haz clic con el ratón o toca para dar una calada">
-      <svg id="svg" viewBox="0 0 440 90" aria-hidden="true"></svg>
+      <svg id="svg" viewBox="0 -34 440 124" aria-hidden="true"></svg>
     </div>
   </section>
 
@@ -98,6 +108,7 @@ textarea{width:100%;margin-top:8px;background:var(--tile);color:var(--ink);borde
     <div class="grid" id="inv" style="margin-top:10px"></div>
   </section>
   <section class="card"><h2>Aspecto del cigarro <span class="sub" id="skc"></span></h2><p class="sub" style="margin-bottom:10px">Las skins son solo estética y se desbloquean jugando.</p><div class="grid" id="skins"></div></section>
+  <section class="card"><h2>Sombreros <span class="sub" id="htc"></span></h2><p class="sub" style="margin-bottom:10px">Se ponen sobre el cigarro con la skin que lleves. Se desbloquean jugando.</p><div class="grid" id="hats"></div></section>
   <section class="card"><h2>Tu imperio</h2><div id="empire"></div></section>
   <section class="card"><h2>Logros <span class="sub" id="achc"></span></h2><div class="grid scroll" id="achs" tabindex="0" aria-label="Lista de logros"></div></section>
   <section class="card" style="text-align:center">
@@ -168,6 +179,33 @@ const SK=[
   deco:u=>{let t=`<radialGradient id="nb${u}"><stop offset="0" stop-color="#ff6bd6" stop-opacity=".7"/><stop offset="1" stop-color="#ff6bd6" stop-opacity="0"/></radialGradient><radialGradient id="nc${u}"><stop offset="0" stop-color="#4dd8ff" stop-opacity=".6"/><stop offset="1" stop-color="#4dd8ff" stop-opacity="0"/></radialGradient><ellipse cx="300" cy="45" rx="62" ry="24" fill="url(#nb${u})"/><ellipse cx="195" cy="44" rx="50" ry="20" fill="url(#nc${u})"/>`;for(let i=0;i<44;i++)t+=`<circle cx="${150+(i*97)%226}" cy="${27+(i*53)%36}" r="${(.6+(i%3)*.5).toFixed(1)}" fill="#fff" opacity="${(.45+(i%4)*.15).toFixed(2)}"/>`;return t}})
 ];
 const SKM={};SK.forEach(k=>SKM[k.id]=k);
+const gr=(id,a,b,h)=>`<linearGradient id="${id}" x1="0" y1="0" x2="${h?1:0}" y2="${h?0:1}"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient>`;
+const STAR="M0 -3.5L1 -1L3.5 0L1 1L0 3.5L-1 1L-3.5 0L-1 -1Z";
+const HT=[
+ {id:"none",n:"Sin sombrero",r:"common",hint:"Con la cabeza al aire",ok:s=>true,draw:null},
+ {id:"gorra",n:"Gorra",r:"common",hint:"Haz 200 clics",ok:s=>s.clicks>=200,
+  draw:u=>`<defs>${gr("hg"+u,"#ff6b6b","#c1272d")}</defs><path d="M-26 0Q-27 -27 0 -29Q27 -27 26 0Z" fill="url(#hg${u})"/><path d="M8 -3Q40 -5 48 2Q30 8 8 3Z" fill="#8e1b21"/><path d="M0 -29Q-6 -14 -3 0" stroke="#7a1218" stroke-opacity=".5" fill="none"/><circle cx="0" cy="-29" r="2.6" fill="#8e1b21"/><path d="M-20 -14Q-18 -22 -8 -25" stroke="#fff" stroke-opacity=".45" stroke-width="2" fill="none" stroke-linecap="round"/>`},
+ {id:"fiesta",n:"Gorro de fiesta",r:"common",hint:"Juega 10 minutos",ok:s=>s.secs>=600,
+  draw:u=>`<defs>${gr("hg"+u,"#ff6bd6","#7a5cff",1)}</defs><path d="M-18 0L0 -50L18 0Z" fill="url(#hg${u})"/><polygon points="-14.4,-10 14.4,-10 12.2,-16 -12.2,-16" fill="#fff" opacity=".75"/><polygon points="-8.6,-26 8.6,-26 6.5,-32 -6.5,-32" fill="#fff" opacity=".75"/><circle cx="-5" cy="-21" r="1.6" fill="#ffe14d"/><circle cx="6" cy="-5" r="1.6" fill="#ffe14d"/><circle cx="0" cy="-51" r="4.5" fill="#ffe14d"/>`},
+ {id:"casco",n:"Casco de obra",r:"common",hint:"Compra una fábrica",ok:s=>(s.own.fabrica||0)>=1,
+  draw:u=>`<defs>${gr("hg"+u,"#ffe34d","#f0b800")}</defs><path d="M-28 0Q-28 -31 0 -31Q28 -31 28 0Z" fill="url(#hg${u})"/><path d="M-6 -31Q-8 -14 -6 0L6 0Q8 -14 6 -31Z" fill="#e0a800" opacity=".7"/><rect x="-35" y="-3" width="70" height="5" rx="2.5" fill="#d99a00"/><path d="M-21 -12Q-18 -22 -9 -26" stroke="#fff" stroke-opacity=".55" stroke-width="2" fill="none" stroke-linecap="round"/>`},
+ {id:"boina",n:"Boina",r:"common",hint:"Ponle nombre a tu cigarro",ok:s=>s.name.trim().length>0,
+  draw:u=>`<defs>${gr("hg"+u,"#4a63e6","#1b2670")}</defs><path d="M-30 -1Q-36 -17 -6 -20Q26 -23 32 -8Q30 2 -30 -1Z" fill="url(#hg${u})"/><rect x="-2" y="-25" width="4" height="7" rx="1.5" fill="#1b2670"/><path d="M-22 -10Q-14 -17 -2 -17" stroke="#fff" stroke-opacity=".35" stroke-width="2" fill="none" stroke-linecap="round"/>`},
+ {id:"chistera",n:"Chistera",r:"rare",hint:"Consigue 100.000 caladas",ok:s=>s.total>=1e5,
+  draw:u=>`<defs>${gr("hg"+u,"#3a3a44","#111116",1)}</defs><ellipse cx="0" cy="0" rx="32" ry="5.5" fill="#15151b"/><rect x="-17" y="-46" width="34" height="46" rx="2" fill="url(#hg${u})"/><ellipse cx="0" cy="-46" rx="17" ry="4" fill="#4a4a55"/><rect x="-17" y="-14" width="34" height="7" fill="#c0262d"/><rect x="-3" y="-15" width="6" height="9" rx="1" fill="none" stroke="#f2c14b" stroke-width="1.6"/><path d="M-12 -40L-12 -18" stroke="#fff" stroke-opacity=".25" stroke-width="2.4" stroke-linecap="round"/><ellipse cx="0" cy="0" rx="32" ry="5.5" fill="none" stroke="#2a2a33"/>`},
+ {id:"vaquero",n:"Sombrero vaquero",r:"rare",hint:"Abre 5 cajetillas misteriosas",ok:s=>s.crates>=5,
+  draw:u=>`<defs>${gr("hg"+u,"#b98550","#7a4a22")}</defs><path d="M-17 -3Q-20 -28 -9 -31Q0 -25 9 -31Q20 -28 17 -3Z" fill="url(#hg${u})"/><path d="M-17.5 -10Q0 -5 17.5 -10L17 -4Q0 1 -17 -4Z" fill="#4a2c12"/><path d="M-46 -4Q-34 6 0 5Q34 6 46 -4Q40 -12 30 -8Q0 -2 -30 -8Q-40 -12 -46 -4Z" fill="#a9733b"/><path d="M-30 -2Q0 3 30 -2" stroke="#6b4220" stroke-opacity=".6" fill="none"/>`},
+ {id:"pirata",n:"Tricornio pirata",r:"rare",hint:"Compra un cargamento",ok:s=>(s.own.barco||0)>=1,
+  draw:u=>`<path d="M-38 0Q-24 -30 0 -30Q24 -30 38 0Q0 -9 -38 0Z" fill="#1d1d22"/><path d="M-38 0Q0 -9 38 0" stroke="#e0b84e" stroke-width="2.4" fill="none"/><path d="M-7 -8L7 -20M7 -8L-7 -20" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/><circle cx="0" cy="-15" r="4.6" fill="#fff"/><rect x="-2.6" y="-11.5" width="5.2" height="3.6" rx="1" fill="#fff"/><circle cx="-1.9" cy="-15.5" r="1.2" fill="#1d1d22"/><circle cx="1.9" cy="-15.5" r="1.2" fill="#1d1d22"/>`},
+ {id:"mago",n:"Sombrero de mago",r:"legendary",hint:"Desbloquea la skin Galaxia",ok:s=>!!s.skins.galaxia,
+  draw:u=>`<defs>${gr("hg"+u,"#9a6cf5","#341b82")}</defs><ellipse cx="0" cy="1" rx="36" ry="6" fill="#4a2aa0"/><path d="M-26 0Q-8 -12 0 -50Q12 -43 16 -37Q21 -18 26 0Z" fill="url(#hg${u})"/><path d="M-24 -6Q0 2 24 -6L26 0Q0 8 -26 0Z" fill="#f2b84b"/><path transform="translate(-4 -24)" d="${STAR}" fill="#ffe27a"/><path transform="translate(9 -15) scale(.8)" d="${STAR}" fill="#ffe27a"/><circle cx="2" cy="-37" r="1.5" fill="#ffe27a"/><circle cx="-12" cy="-12" r="1.3" fill="#ffe27a"/>`},
+ {id:"corona",n:"Corona real",r:"legendary",hint:"Consigue 30 logros",ok:s=>Object.keys(s.ach).length>=30,
+  draw:u=>`<defs>${gr("hg"+u,"#fff0b3","#c9a24a")}</defs><path d="M-24 0L-26 -24L-13 -12L0 -28L13 -12L26 -24L24 0Z" fill="url(#hg${u})"/><rect x="-24" y="-7" width="48" height="7" rx="1" fill="#b98a22"/><circle cx="-26" cy="-24" r="2.8" fill="#ff4d6d"/><circle cx="0" cy="-28" r="3" fill="#4dd8ff"/><circle cx="26" cy="-24" r="2.8" fill="#ff4d6d"/><circle cx="-12" cy="-3.5" r="2" fill="#4dff9a"/><circle cx="0" cy="-3.5" r="2" fill="#ff4d6d"/><circle cx="12" cy="-3.5" r="2" fill="#4dff9a"/>`},
+ {id:"aureola",n:"Aureola",r:"legendary",hint:"Juega 1 hora",ok:s=>s.secs>=3600,
+  draw:u=>`<ellipse cx="0" cy="-20" rx="24" ry="6.5" fill="none" stroke="#ffe27a" stroke-width="8" opacity=".5" filter="url(#bl${u})"/><ellipse cx="0" cy="-20" rx="24" ry="6.5" fill="none" stroke="#fff3b0" stroke-width="3.2"/>`}
+];
+const SHM={};HT.forEach(h=>SHM[h.id]=h);
+const hatSvg=(h,u)=>h&&h.draw?`<g transform="translate(78 25) rotate(-5)">${h.draw(u)}</g>`:"";
 function cigInner(k,u,anim){
   const grad=(id,c,h,m)=>`<linearGradient id="${id}${u}" x1="0" y1="0" x2="${h?1:0}" y2="${h?0:1}"><stop offset="0" stop-color="${c[0]}"/><stop offset="${m}" stop-color="${c[1]}"/><stop offset="1" stop-color="${c[2]}"/></linearGradient>`;
   const E=k.ember;
@@ -189,7 +227,7 @@ function cigInner(k,u,anim){
 <rect x="104" y="25" width="2" height="40" fill="#5b3208" opacity=".5"/><rect x="118" y="25" width="2" height="40" fill="#5b3208" opacity=".5"/>`;
 }
 function applySkin(){
-  const k=SKM[S.skin]||SKM.clasico;$("svg").innerHTML=cigInner(k,"m",true);
+  const k=SKM[S.skin]||SKM.clasico;$("svg").innerHTML=cigInner(k,"m",true)+hatSvg(SHM[S.hat],"m");
   const st=$("stage").style;st.setProperty("--sm1",k.smoke[0]);st.setProperty("--sm2",k.smoke[1]);st.setProperty("--glow",hexA(k.ember[1],.22));
 }
 function drawSkins(){
@@ -199,6 +237,23 @@ function drawSkins(){
       :`<div class="tile skin locked r-${k.r}">${mini}<b>🔒 ${k.n}</b><small>${k.hint}</small></div>`}).join("");
   document.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{S.skin=b.dataset.k;applySkin();drawSkins();sfx.buy();checkAch();save()});
   $("skc").textContent="("+SK.filter(k=>S.skins[k.id]).length+"/"+SK.length+")";
+}
+function drawHats(){
+  const sk=SKM[S.skin]||SKM.clasico;
+  $("hats").innerHTML=HT.map(h=>{
+    const own=S.hats[h.id],on=S.hat===h.id,u="h"+h.id,
+    mini=`<svg viewBox="4 -52 144 112" aria-hidden="true">${cigInner(sk,u,false)}${hatSvg(h,u)}</svg>`;
+    return own?`<button class="tile hat r-${h.r}" data-h="${h.id}" aria-pressed="${on}">${mini}<b>${h.n}</b><small style="color:${COL[h.r]}">${RAR[h.r]}${on?" · puesto":""}</small></button>`
+      :`<div class="tile hat locked r-${h.r}">${mini}<b>🔒 ${h.n}</b><small>${h.hint}</small></div>`}).join("");
+  document.querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>{S.hat=b.dataset.h;applySkin();drawHats();sfx.buy();checkAch();save()});
+  $("htc").textContent="("+HT.filter(h=>S.hats[h.id]).length+"/"+HT.length+")";
+}
+function checkHats(){
+  const nw=HT.filter(h=>!S.hats[h.id]&&h.ok(S));
+  if(!nw.length)return;
+  nw.forEach(h=>S.hats[h.id]=1);
+  if(nw.length<=2)nw.forEach(h=>toast("🎩 Sombrero desbloqueado: "+h.n,COL[h.r]));else toast("🎩 "+nw.length+" sombreros nuevos desbloqueados","#f2b84b");
+  sfx.loot("rare");drawHats();save();
 }
 function checkSkins(){
   const nw=SK.filter(k=>!S.skins[k.id]&&k.ok(S));
@@ -254,14 +309,18 @@ const A=[
  {id:"a44",n:"Un ratito",i:"⏳",d:"Juega 10 minutos",f:s=>s.secs>=600},
  {id:"a45",n:"Maratón",i:"🏃",d:"Juega 1 hora",f:s=>s.secs>=3600},
  {id:"a46",n:"Insomnio",i:"🌙",d:"Juega entre las 0:00 y las 5:00",secret:1,f:s=>new Date().getHours()<5},
- {id:"a47",n:"Modo ninja",i:"🥷",d:"Silencia el sonido",secret:1,f:s=>s.mute}
+ {id:"a47",n:"Modo ninja",i:"🥷",d:"Silencia el sonido",secret:1,f:s=>s.mute},
+ {id:"a48",n:"Con sombrero",i:"🎩",d:"Ponle un sombrero al cigarro",f:s=>s.hat!=="none"},
+ {id:"a49",n:"Sombrerero loco",i:"🧢",d:"Desbloquea 5 sombreros",f:s=>Object.keys(s.hats).filter(k=>k!=="none").length>=5},
+ {id:"a50",n:"Perchero completo",i:"🎓",d:"Desbloquea todos los sombreros",f:s=>HT.every(h=>s.hats[h.id])}
 ];
 const KEY="cigarro-clicker-v2";
-const fresh=()=>({n:0,total:0,clicks:0,own:{},hands:{},ach:{},inv:{},slots:[null,null,null],crates:0,golds:0,mute:false,name:"",skin:"clasico",skins:{clasico:1},secs:0,fast:0});
+const fresh=()=>({n:0,total:0,clicks:0,own:{},hands:{},ach:{},inv:{},slots:[null,null,null],crates:0,golds:0,mute:false,name:"",skin:"clasico",skins:{clasico:1},secs:0,fast:0,hat:"none",hats:{none:1}});
 let S=fresh(),FX=[];
 function norm(){S.slots=(S.slots||[]).concat([null,null,null]).slice(0,3);S.inv=S.inv||{};S.own=S.own||{};S.hands=S.hands||{};S.ach=S.ach||{};
   S.skins=(S.skins&&typeof S.skins==="object")?S.skins:{};S.skins.clasico=1;if(!SKM[S.skin]||!S.skins[S.skin])S.skin="clasico";
-  S.name=typeof S.name==="string"?S.name.slice(0,20):"";S.secs=+S.secs||0;S.fast=S.fast?1:0}
+  S.name=typeof S.name==="string"?S.name.slice(0,20):"";S.secs=+S.secs||0;S.fast=S.fast?1:0;
+  S.hats=(S.hats&&typeof S.hats==="object")?S.hats:{};S.hats.none=1;if(!SHM[S.hat]||!S.hats[S.hat])S.hat="none"}
 try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(fresh(),JSON.parse(r))}catch(e){}
 norm();
 const $=id=>document.getElementById(id);
@@ -324,7 +383,7 @@ function drawAch(){
   $("achc").textContent="("+A.filter(a=>S.ach[a.id]).length+"/"+A.length+")";
 }
 function checkAch(){
-  checkSkins();
+  checkSkins();checkHats();
   const got=A.filter(a=>!S.ach[a.id]&&a.f(S));
   if(!got.length)return;
   got.forEach(a=>S.ach[a.id]=1);
@@ -395,12 +454,14 @@ function clickGold(){
 
 /* Clic en el cigarro: solo ratón o toque (no teclado) */
 const CT=[];
+let lastTap=0;
+$("cig").addEventListener("touchend",e=>{const t=Date.now();if(t-lastTap<350)e.preventDefault();lastTap=t},{passive:false});
 function fx(e){
   const st=$("stage").getBoundingClientRect(),r=$("svg").getBoundingClientRect();
   const p=document.createElement("div");p.className="plus";p.textContent="+"+fmt(cpc());
   p.style.left=(e.clientX-st.left)+"px";p.style.top=(e.clientY-st.top-10)+"px";$("stage").appendChild(p);setTimeout(()=>p.remove(),900);
   const sz=12+Math.random()*12,s=document.createElement("div");s.className="puff";
-  s.style.cssText=`width:${sz}px;height:${sz}px;left:${r.right-st.left-r.width*.06}px;top:${r.top-st.top+r.height*.2}px;--dx:${Math.random()*70-35}px`;
+  s.style.cssText=`width:${sz}px;height:${sz}px;left:${r.right-st.left-r.width*.06}px;top:${r.top-st.top+r.height*.45}px;--dx:${Math.random()*70-35}px`;
   $("stage").appendChild(s);setTimeout(()=>s.remove(),1800);
 }
 $("cig").addEventListener("pointerdown",e=>{
@@ -410,7 +471,7 @@ $("cig").addEventListener("pointerdown",e=>{
 });
 
 /* Reinicio, copia y bucle */
-function renderAll(){$("cn").value=S.name;applySkin();buildHands();buildShop();drawEmpire();drawAch();drawLoot();drawSkins();drawStats();setSnd()}
+function renderAll(){$("cn").value=S.name;applySkin();buildHands();buildShop();drawEmpire();drawAch();drawLoot();drawSkins();drawHats();drawStats();setSnd()}
 function resetUI(c){
   const box=$("resetBox");
   if(!c){box.innerHTML='<button class="btn" id="r1">Reiniciar partida</button>';$("r1").onclick=()=>resetUI(true)}
